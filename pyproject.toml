@@ -17,7 +17,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "lmdb==1.5.1",
+    "lmdb==1.6.2",
     "pyyaml==6.0.2",
     "plumbum==1.9.0",
     "pydantic==2.9.2",
