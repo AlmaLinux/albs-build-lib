@@ -230,6 +230,10 @@ class MockSupervisor():
             config_params.append(
                 'config_opts["macros"]["%_host_cpu"] = "ppc64le"\n'
             )
+        if self.__host_arch == 'riscv64':
+            config_params.append(
+                'config_opts["macros"]["%__spec_check_template"] = "exit 0; "\n'
+            )
         config_path = os.path.join(self.__storage_dir, 'site-defaults.cfg')
         self.__log.info(
             'generating site-defaults.cfg in the %s directory',
