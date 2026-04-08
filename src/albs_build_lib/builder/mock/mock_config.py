@@ -108,6 +108,7 @@ class MockConfig():
         yum_config=None,
         basedir=None,
         cachedir=None,
+        shared_cache_key=None,
         **kwargs,
     ):
         """
@@ -137,6 +138,10 @@ class MockConfig():
             Yum configuration.
         basedir : str, optional
             Mock basedir if want to override the default one (/var/lib/mock/).
+        shared_cache_key : str, optional
+            When set, configures yum_cache plugin to share the package
+            cache across mock configs with the same key (e.g.
+            'almalinux-kitten-10-x86_64').
 
         Raises
         ------
@@ -169,6 +174,7 @@ class MockConfig():
             'cache_topdir': cachedir,
         }
         self.__config_opts.update(**kwargs)
+        self.__shared_cache_key = shared_cache_key
         self.__append_config_opts = collections.defaultdict(list)
         self.__files = {}
         if files:
@@ -415,6 +421,13 @@ class MockConfig():
                     )
             for plugin in self.__plugins.values():
                 fd.write(plugin.render_config())
+            if self.__shared_cache_key:
+                fd.write(
+                    'config_opts["plugin_conf"]["yum_cache_opts"]'
+                    '["cache_key"] = {}\n'.format(
+                        to_mock_config_string(self.__shared_cache_key)
+                    )
+                )
             if self.__yum_config:
                 fd.write(self.__yum_config.render_config())
             for chroot_file in self.__files.values():

@@ -22,11 +22,12 @@ class BaseYumConfig():
                 'best',
                 'enabled',
                 'gpgcheck',
+                'keepcache',
                 'obsoletes',
                 'module_hotfixes',
             ):
                 cfg.set(section, key, BaseYumConfig.render_bool_option(value))
-            elif key in ('debuglevel', 'retries'):
+            elif key in ('debuglevel', 'metadata_expire', 'retries'):
                 cfg.set(section, key, str(value))
             elif key == 'syslog_device':
                 cfg.set(section, key, value.strip())
@@ -117,6 +118,8 @@ class YumConfig(BaseYumConfig):
         repositories=None,
         module_platform_id=None,
         best=None,
+        keepcache=None,
+        metadata_expire=None,
     ):
         """
         Yum configuration initialization.
