@@ -62,7 +62,7 @@ class MockSupervisor():
         self.__refresh_time = refresh_time
         self.__db = self.__init_storage()
 
-    def environment(self, mock_config):
+    def environment(self, mock_config, cli_config_opts=None):
         """
         Finds a free mock environment for the specified configuration or
         creates it.
@@ -118,6 +118,7 @@ class MockSupervisor():
                 mock_root=self.__root_dir,
                 mock_cache_root=self.__cache_dir,
                 dirs_to_umount_on_clean=self.__sys_dirs_to_umount,
+                cli_config_opts=cli_config_opts,
             )
 
     def free_environment(self, environment):

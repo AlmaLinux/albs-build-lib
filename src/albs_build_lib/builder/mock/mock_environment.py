@@ -142,11 +142,13 @@ class MockEnvironment():
         mock_root=None,
         mock_cache_root=None,
         dirs_to_umount_on_clean=None,
+        cli_config_opts=None,
     ):
         self.__log = logging.getLogger(self.__module__)
         self.__supervisor = supervisor
         self.__mock_root = mock_root or '/var/lib/mock'
         self.__mock_cache_root = mock_cache_root or '/var/cache/mock'
+        self.__cli_config_opts = cli_config_opts or {}
         if isinstance(config_path, bytes):
             config_path = config_path.decode('utf-8')
         if isinstance(root, bytes):
@@ -478,6 +480,8 @@ class MockEnvironment():
         """
         mock = plumbum.local['mock']
         args = ['--configdir', self.__configdir, '--root', self.__root]
+        for k, v in self.__cli_config_opts.items():
+            args.extend(['--config-opts', '{0}={1}'.format(k, v)])
         if self.__log.getEffectiveLevel() <= logging.DEBUG:
             args.append('--verbose')
 
