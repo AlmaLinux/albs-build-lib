@@ -9,6 +9,8 @@ import threading
 
 from albs_common_lib.utils.file_utils import clean_dir
 
+from albs_build_lib.builder.numa import apply_cpu_affinity
+
 
 class BaseSlaveBuilder(threading.Thread):
     """Build thread."""
@@ -16,6 +18,7 @@ class BaseSlaveBuilder(threading.Thread):
     def __init__(
         self,
         thread_num,
+        numa_cpus=None,
     ):
         """
         Build thread initialization.
@@ -30,8 +33,31 @@ class BaseSlaveBuilder(threading.Thread):
             Shows, if process got "kill -15" signal.
         graceful_terminated_event : threading.Event
             Shows, if process got "kill -10" signal.
+        numa_cpus : list of int, optional
+            CPU identifiers the thread should be pinned to. When provided,
+            ``apply_numa_affinity`` confines the thread (and the processes it
+            spawns) to these CPUs so that a build stays on a single NUMA node.
         """
         super().__init__(name='Builder-{0}'.format(thread_num))
+        self._numa_cpus = numa_cpus
+
+    def apply_numa_affinity(self):
+        """
+        Pins the running thread to the configured NUMA CPU set.
+
+        Must be called from inside ``run()`` so that the affinity is applied
+        to the build thread itself rather than the thread that constructed
+        the builder. Subprocesses spawned afterwards inherit the mask.
+        """
+        if not self._numa_cpus:
+            return
+        applied = apply_cpu_affinity(self._numa_cpus)
+        if applied:
+            logging.info(
+                '%s pinned to CPUs %s',
+                self.name,
+                sorted(applied),
+            )
 
     @staticmethod
     def init_working_dir(working_dir):
